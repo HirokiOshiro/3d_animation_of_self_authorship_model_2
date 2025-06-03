@@ -1,0 +1,1821 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>セルフ・オーサーシップ3Dジャーニー - Responsive</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&display=swap');
+        
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            margin: 0;
+            font-family: 'Noto Sans JP', sans-serif;
+            overflow: hidden;
+            background: #0a0a0a;
+            cursor: grab;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        body:active {
+            cursor: grabbing;
+        }
+        
+        /* Base font size for responsive scaling */
+        html {
+            font-size: 16px;
+        }
+        
+        /* Info Panel */
+        #info {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            color: white;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1.25rem;
+            border-radius: 0.9375rem;
+            max-width: 380px;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease;
+        }
+        
+        /* Info Panel Toggle for Mobile */
+        #info-toggle {
+            display: none;
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 3rem;
+            height: 3rem;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 101;
+            font-size: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Controls */
+        #controls {
+            position: absolute;
+            bottom: 1.25rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1.25rem 1.875rem;
+            border-radius: 0.9375rem;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.9375rem;
+            max-width: 90vw;
+        }
+        
+        .control-row {
+            display: flex;
+            gap: 0.625rem;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        button {
+            margin: 0 0.3125rem;
+            padding: 0.625rem 1.25rem;
+            background: #0ea5e9;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.3s;
+            font-weight: 500;
+            min-height: 44px;
+            min-width: 44px;
+            touch-action: manipulation;
+        }
+        
+        button:hover, button:active {
+            background: #0284c7;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 165, 233, 0.4);
+        }
+        
+        button.active {
+            background: #f59e0b;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+        }
+        
+        button.sub-stage-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+            background: #475569;
+        }
+        
+        button.sub-stage-btn.active {
+            background: #10b981;
+        }
+        
+        h2 {
+            margin-top: 0;
+            color: #0ea5e9;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        h3 {
+            color: #f59e0b;
+            font-size: 1.125rem;
+            margin-top: 0.9375rem;
+            font-weight: 700;
+        }
+        
+        .dimension-label {
+            color: #94a3b8;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0.9375rem;
+            font-weight: 700;
+        }
+        
+        .dimension-content {
+            margin-top: 0.3125rem;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: #e2e8f0;
+        }
+        
+        .stage-description {
+            margin-top: 0.625rem;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+        }
+        
+        #loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1.25rem;
+            z-index: 200;
+        }
+        
+        /* Legend */
+        .legend {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1.25rem;
+            border-radius: 0.9375rem;
+            backdrop-filter: blur(10px);
+            color: white;
+            font-size: 0.75rem;
+            z-index: 100;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 0.5rem 0;
+        }
+        
+        .legend-color {
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 50%;
+            margin-right: 0.625rem;
+            box-shadow: 0 0 10px currentColor;
+        }
+        
+        #particle-info {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 0.9375rem;
+            border-radius: 0.625rem;
+            font-size: 0.875rem;
+            pointer-events: none;
+            z-index: 150;
+            display: none;
+            max-width: 250px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Journey Progress */
+        #journey-progress {
+            position: absolute;
+            top: 50%;
+            right: 1.25rem;
+            transform: translateY(-50%);
+            width: 3.75rem;
+            height: auto;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 1.875rem;
+            padding: 1.25rem 0.625rem;
+            z-index: 100;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .progress-node {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background: #1e293b;
+            margin: 1.25rem auto;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 700;
+            touch-action: manipulation;
+        }
+        
+        .progress-node.active {
+            background: #0ea5e9;
+            color: white;
+            box-shadow: 0 0 20px #0ea5e9;
+            transform: scale(1.2);
+        }
+        
+        .progress-node.completed {
+            background: #10b981;
+            color: white;
+        }
+        
+        /* Sound Toggle */
+        .sound-toggle {
+            position: absolute;
+            bottom: 1.25rem;
+            right: 1.25rem;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            width: 3.125rem;
+            height: 3.125rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            color: white;
+            font-size: 1.25rem;
+            touch-action: manipulation;
+        }
+        
+        .path-toggle {
+            background: #8b5cf6;
+        }
+        
+        .path-toggle:hover {
+            background: #7c3aed;
+        }
+        
+        /* Tutorial */
+        #tutorial {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            padding: 2.5rem;
+            border-radius: 1.25rem;
+            max-width: min(500px, 90vw);
+            z-index: 300;
+            text-align: center;
+            display: none;
+            border: 2px solid #0ea5e9;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        #tutorial h2 {
+            color: #0ea5e9;
+            margin-bottom: 1.25rem;
+        }
+        
+        #tutorial p {
+            line-height: 1.8;
+            margin-bottom: 1.875rem;
+            font-size: 0.875rem;
+        }
+        
+        .highlight {
+            color: #f59e0b;
+            font-weight: 700;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 0.9375rem;
+            margin-top: 0.625rem;
+        }
+        
+        input[type="range"] {
+            width: 12.5rem;
+            height: 0.375rem;
+            background: #334155;
+            outline: none;
+            border-radius: 0.1875rem;
+            cursor: pointer;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 1.125rem;
+            height: 1.125rem;
+            background: #0ea5e9;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .speed-label {
+            color: #94a3b8;
+            font-size: 0.75rem;
+            min-width: 3.75rem;
+        }
+        
+        /* Mobile Menu Toggle */
+        #mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            bottom: 1.25rem;
+            left: 1.25rem;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 3.5rem;
+            height: 3.5rem;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 102;
+            font-size: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Tablet Styles */
+        @media (max-width: 1024px) {
+            html {
+                font-size: 15px;
+            }
+            
+            #info {
+                max-width: 320px;
+            }
+            
+            .legend {
+                font-size: 0.7rem;
+                padding: 1rem;
+            }
+            
+            #journey-progress {
+                width: 3.125rem;
+            }
+            
+            .progress-node {
+                width: 2rem;
+                height: 2rem;
+                font-size: 0.625rem;
+                margin: 1rem auto;
+            }
+        }
+        
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+            html {
+                font-size: 14px;
+            }
+            
+            /* Hide/Show elements for mobile */
+            #info {
+                left: -100%;
+                top: 0;
+                right: auto;
+                bottom: 0;
+                max-width: 80vw;
+                height: 100vh;
+                border-radius: 0;
+                overflow-y: auto;
+            }
+            
+            #info.show {
+                left: 0;
+            }
+            
+            #info-toggle {
+                display: flex;
+            }
+            
+            .legend {
+                display: none;
+            }
+            
+            /* Horizontal progress bar for mobile */
+            #journey-progress {
+                top: auto;
+                bottom: 5rem;
+                left: 50%;
+                right: auto;
+                transform: translateX(-50%);
+                width: 90vw;
+                height: 3.75rem;
+                display: flex;
+                flex-direction: row;
+                padding: 0.625rem 1.25rem;
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .progress-node {
+                margin: 0 0.625rem;
+                flex-shrink: 0;
+            }
+            
+            /* Simplified controls */
+            #controls {
+                bottom: 0.625rem;
+                padding: 0.75rem 1rem;
+                width: 95vw;
+                display: none;
+            }
+            
+            #controls.show {
+                display: flex;
+            }
+            
+            #mobile-menu-toggle {
+                display: flex;
+            }
+            
+            .control-row {
+                gap: 0.375rem;
+            }
+            
+            button {
+                padding: 0.5rem 0.875rem;
+                font-size: 0.75rem;
+            }
+            
+            button.sub-stage-btn {
+                padding: 0.375rem 0.625rem;
+                font-size: 0.625rem;
+            }
+            
+            .slider-container {
+                width: 100%;
+            }
+            
+            input[type="range"] {
+                flex: 1;
+            }
+            
+            /* Particle info centered for mobile */
+            #particle-info {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                max-width: 80vw;
+            }
+            
+            /* Sound toggle repositioned */
+            .sound-toggle {
+                bottom: auto;
+                top: 1.25rem;
+                right: 1.25rem;
+            }
+        }
+        
+        /* Landscape Mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            #journey-progress {
+                bottom: 0.5rem;
+                height: 3rem;
+            }
+            
+            .progress-node {
+                width: 2rem;
+                height: 2rem;
+            }
+            
+            #controls {
+                bottom: 0.375rem;
+                padding: 0.5rem 0.875rem;
+            }
+            
+            #controls .control-row {
+                gap: 0.25rem;
+            }
+            
+            button {
+                padding: 0.375rem 0.75rem;
+                font-size: 0.625rem;
+                min-height: 36px;
+            }
+        }
+        
+        /* Small Mobile */
+        @media (max-width: 480px) {
+            html {
+                font-size: 13px;
+            }
+            
+            #tutorial {
+                padding: 1.5rem;
+            }
+            
+            h2 {
+                font-size: 1.25rem;
+            }
+            
+            h3 {
+                font-size: 1rem;
+            }
+        }
+        
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+        
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            button {
+                border: 2px solid white;
+            }
+            
+            .progress-node {
+                border: 2px solid white;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="loader">Loading...</div>
+    
+    <div id="info-toggle" onclick="toggleInfoPanel()" aria-label="情報パネル切り替え">ℹ️</div>
+    
+    <div id="tutorial">
+        <h2>セルフ・オーサーシップ3Dジャーニーへようこそ</h2>
+        <p>
+            この3D空間では、<span class="highlight">自己の成長</span>を視覚的に体験できます。<br><br>
+            <strong>操作方法：</strong><br>
+            <span id="control-instructions">
+                • マウスドラッグで視点を回転<br>
+                • スクロールでズーム<br>
+                • パーティクルをクリックで詳細表示<br>
+                • 右側のノードで段階を直接選択<br><br>
+            </span>
+            <strong>3つの次元：</strong><br>
+            <span style="color: #3b82f6;">青</span>：認識論的次元<br>
+            <span style="color: #10b981;">緑</span>：対自関係次元<br>
+            <span style="color: #f59e0b;">橙</span>：対人関係次元
+        </p>
+        <button onclick="closeTutorial()">始める</button>
+    </div>
+    
+    <div id="info">
+        <h2>セルフ・オーサーシップの旅</h2>
+        <div id="stage-info">
+            <h3 id="current-stage">外的意味形成</h3>
+            <div class="stage-description" id="stage-description">
+                外部の権威や他者の期待に依存して意味を形成する段階
+            </div>
+            <div style="margin-top: 15px;">
+                <div class="dimension-label">認識論的次元</div>
+                <div class="dimension-content" id="epistemological">知識は権威から与えられるもの</div>
+            </div>
+            <div style="margin-top: 10px;">
+                <div class="dimension-label">対自関係次元</div>
+                <div class="dimension-content" id="intrapersonal">自己は他者の評価に依存</div>
+            </div>
+            <div style="margin-top: 10px;">
+                <div class="dimension-label">対人関係次元</div>
+                <div class="dimension-content" id="interpersonal">他者からの承認を求める関係</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="legend">
+        <h4 style="margin-top: 0; color: #0ea5e9;">視覚的ガイド</h4>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #3b82f6;"></div>
+            <span>認識論的次元</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #10b981;"></div>
+            <span>対自関係次元</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #f59e0b;"></div>
+            <span>対人関係次元</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffffff;"></div>
+            <span>自己（コア）</span>
+        </div>
+        <div class="legend-item" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2);">
+            <div class="legend-color" style="background: linear-gradient(45deg, #3b82f6, #10b981, #f59e0b);"></div>
+            <span>内なる光の放射</span>
+        </div>
+    </div>
+    
+    <div id="journey-progress">
+        <div class="progress-node" onclick="jumpToStage('Ea')" title="外的権威を信頼">Ea</div>
+        <div class="progress-node" onclick="jumpToStage('Eb')" title="緊張の経験">Eb</div>
+        <div class="progress-node" onclick="jumpToStage('Ec')" title="欠点の認識">Ec</div>
+        <div class="progress-node" onclick="jumpToStage('EI')" title="疑問を持つ">E(I)</div>
+        <div class="progress-node" onclick="jumpToStage('E-I')" title="内なる声を構築">E-I</div>
+        <div class="progress-node" onclick="jumpToStage('I-E')" title="内なる声を聴く">I-E</div>
+        <div class="progress-node" onclick="jumpToStage('IE')" title="内なる声を育む">I(E)</div>
+        <div class="progress-node" onclick="jumpToStage('Ia')" title="内なる声を信頼">Ia</div>
+        <div class="progress-node" onclick="jumpToStage('Ib')" title="内なる基盤を築く">Ib</div>
+        <div class="progress-node" onclick="jumpToStage('Ic')" title="コミットメント確保">Ic</div>
+    </div>
+    
+    <div id="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="メニュー切り替え">☰</div>
+    
+    <div id="controls">
+        <div class="control-row">
+            <button onclick="showStage('external')" class="main-stage-btn active">外的意味形成</button>
+            <button onclick="showStage('crossroads')" class="main-stage-btn">岐路</button>
+            <button onclick="showStage('internal')" class="main-stage-btn">内的意味形成</button>
+        </div>
+        <div class="control-row" id="sub-stage-controls">
+            <!-- サブステージボタンは動的に生成 -->
+        </div>
+        <div class="control-row">
+            <button onclick="toggleAnimation()" id="animation-toggle">自動進行: ON</button>
+            <button onclick="togglePath()" class="path-toggle">内なる光: OFF</button>
+            <button onclick="resetView()">視点リセット</button>
+        </div>
+        <div class="slider-container">
+            <span class="speed-label">速度:</span>
+            <input type="range" id="speed-slider" min="0" max="2" step="0.1" value="1" aria-label="アニメーション速度">
+            <span class="speed-label" id="speed-value">1.0x</span>
+        </div>
+    </div>
+    
+    <div class="sound-toggle" onclick="toggleSound()" title="サウンド切り替え" aria-label="サウンド切り替え">
+        🔊
+    </div>
+    
+    <div id="particle-info"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer;
+        let particles = [];
+        let core;
+        let dimensionRings = [];
+        let currentStage = 'external';
+        let currentSubStage = 'Ea';
+        let animationRunning = true;
+        let time = 0;
+        let soundEnabled = true;
+        let pathEnabled = false;
+        let journeyPath;
+        let raycaster, mouse;
+        let controls;
+        let speedMultiplier = 1;
+        let isMobile = false;
+        let isTablet = false;
+        let particleCount = 150;
+        
+        // Audio context for sound effects
+        let audioContext;
+        let oscillator;
+        
+        // Touch handling variables
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchStartDistance = 0;
+        let cameraDistance = 10;
+        
+        // Detailed stage data
+        const subStageData = {
+            'Ea': {
+                name: 'Ea: 外的権威を信頼する',
+                parent: 'external',
+                description: '一貫して盲目的に外的資源を信頼し、その欠点の可能性を認識しない',
+                epistemological: '知識は権威から与えられる絶対的なもの。権威の言うことが正解',
+                intrapersonal: '自己の定義は他者からの評価や期待に完全に依存',
+                interpersonal: '他者からの承認を強く求め、権威や多数派に同調する傾向',
+                coreSize: 0.2,
+                particleSpread: 6,
+                ringRotation: 0.008,
+                coreColor: 0x4a5568,
+                intensity: 0.3
+            },
+            'Eb': {
+                name: 'Eb: 外的権威信頼の緊張',
+                parent: 'external',
+                description: '外的資源を信頼するが、特に資源間に葛藤がある場合に緊張を経験',
+                epistemological: '複数の権威が異なることを言う場面に直面し、知識の絶対性に揺らぎを感じ始める',
+                intrapersonal: '外的期待の間で板挟みになり、自己の感覚に違和感や居心地の悪さを感じ始める',
+                interpersonal: '異なる期待や意見の間で葛藤し、関係性の調整に困難を感じる',
+                coreSize: 0.3,
+                particleSpread: 5,
+                ringRotation: 0.012,
+                coreColor: 0x64748b,
+                intensity: 0.4
+            },
+            'Ec': {
+                name: 'Ec: 外的権威信頼の欠点認識',
+                parent: 'external',
+                description: '外的権威への信頼を継続するが、その欠点を認識している',
+                epistemological: '知識の相対性や不確実性に気づき始める。権威に依存することの限界を自覚',
+                intrapersonal: '「自分は何者か」という問いが生まれ始める。外的な権威に依存することへのフラストレーション',
+                interpersonal: '他者の承認を求め続けるが、そこに限界を感じる。関係における自己のあり方について考え始める',
+                coreSize: 0.4,
+                particleSpread: 4.5,
+                ringRotation: 0.015,
+                coreColor: 0x94a3b8,
+                intensity: 0.5
+            },
+            'EI': {
+                name: 'E(I): 外的権威に疑問を持つ',
+                parent: 'crossroads',
+                description: '内なる声の必要性を自覚するも、外的資源への信頼を継続',
+                epistemological: '権威や既存の知識に疑問を抱き始める。自分の考えや視点の重要性を認識',
+                intrapersonal: '「自分はどうしたいのか」という内的な問いが強まる。自己決定の必要性を感じるが自信がない',
+                interpersonal: '他者の期待と自分の考えの間で揺れ動く。関係の中で自分の意見を表明することにためらい',
+                coreSize: 0.5,
+                particleSpread: 3.8,
+                ringRotation: 0.018,
+                coreColor: 0x0ea5e9,
+                intensity: 0.6
+            },
+            'E-I': {
+                name: 'E-I: 内なる声を構築する',
+                parent: 'crossroads',
+                description: '意味形成の新しい仕方を構築するよう能動的に動き始めるが、時に後退も',
+                epistemological: '自分の考えや判断基準を積極的に構築しようと試みる。批判的に検討し始めるが、時に外的権威に頼る',
+                intrapersonal: '内なる声（価値観、信念）を意識的に形成しようとする。自己探求が活発になるが、不安や混乱も',
+                interpersonal: '自分の考えを他者に伝え、関係の中で試行錯誤する。外的影響と内的志向の間で緊張',
+                coreSize: 0.6,
+                particleSpread: 3.2,
+                ringRotation: 0.02,
+                coreColor: 0x3b82f6,
+                intensity: 0.7
+            },
+            'I-E': {
+                name: 'I-E: 内なる声を聴く',
+                parent: 'crossroads',
+                description: '内なる声を注意深く聞き取り始め、外的資源を押しのけつつある',
+                epistemological: '内的な判断基準が明確になり始める。外的情報を鵜呑みにせず、自分のフィルターを通して解釈',
+                intrapersonal: '自分の感情や欲求に注意を払い、それに基づいて意思決定しようとする。自己信頼感が増し始める',
+                interpersonal: '他者の視点を尊重しつつも、自分の意見を区別できるようになる。外的影響を管理する意識',
+                coreSize: 0.7,
+                particleSpread: 2.5,
+                ringRotation: 0.022,
+                coreColor: 0x10b981,
+                intensity: 0.75
+            },
+            'IE': {
+                name: 'I(E): 内なる声を育む',
+                parent: 'crossroads',
+                description: '内なる声を能動的に育み始め、外的資源を凌駕する',
+                epistemological: '自分の考えや視点を生み出すことを自己認識し、積極的に発展させる。知識構築の主体としての自覚',
+                intrapersonal: '自己洞察を深め、興味関心や欲求を分析。内なる声を用いることに自信を持ち始めるが、時に外的影響に揺らぐ',
+                interpersonal: '他者との関係において、自分の内なる声に基づいて行動しようとする。外的影響をマネジメントする意識が高まる',
+                coreSize: 0.8,
+                particleSpread: 2,
+                ringRotation: 0.025,
+                coreColor: 0x22c55e,
+                intensity: 0.8
+            },
+            'Ia': {
+                name: 'Ia: 内なる声を信頼する',
+                parent: 'internal',
+                description: '信念等を洗練するのに十分内なる声を信頼。外的資源を管理',
+                epistemological: '内的な判断基準や信念体系が確立され、それに基づいて知識を主体的に解釈・評価。知識構築の保有者としての責任',
+                intrapersonal: '内なる声への信頼が確固たるものとなり、自己決定に自信を持つ。困難な状況でも感情をコントロール',
+                interpersonal: '外的影響を分析・調整しながら、自分の内なる声に基づいて他者と関係を構築。相互尊重に基づいた自律的な関係',
+                coreSize: 0.9,
+                particleSpread: 1.5,
+                ringRotation: 0.028,
+                coreColor: 0xf59e0b,
+                intensity: 0.85
+            },
+            'Ib': {
+                name: 'Ib: 内なる基盤を築く',
+                parent: 'internal',
+                description: '人生哲学へのコミットメントを形成するのに十分内なる声を信頼',
+                epistemological: '内なる声と外的影響を統合し、一貫した人生哲学や世界観を形成。知識を知恵へと昇華',
+                intrapersonal: '自己の弱みも直視し、内なる声とそれに基づく自己決定を重ねることで、内的な基盤を強固に',
+                interpersonal: '自己の人生哲学に基づいて他者や社会と関わる。多様な価値観を理解しつつ、自己の立場を明確に',
+                coreSize: 0.95,
+                particleSpread: 1.2,
+                ringRotation: 0.03,
+                coreColor: 0xec4899,
+                intensity: 0.9
+            },
+            'Ic': {
+                name: 'Ic: 内なるコミットメントを確保',
+                parent: 'internal',
+                description: '人生哲学を自分の存在の核として固め、第二の性質として生きる',
+                epistemological: '統合された人生哲学が自己の核となり、それが知識の解釈や行動の指針として自然に機能',
+                intrapersonal: '内なる基盤と外的環境が調和的に統合され、自己の存在意義や人生の目的が明確に。コミットメントと共に生きる',
+                interpersonal: '自己の核となる価値観に基づいて、他者や社会に貢献しようとする。真の相互依存関係の中で自己実現',
+                coreSize: 1,
+                particleSpread: 1,
+                ringRotation: 0.035,
+                coreColor: 0xffffff,
+                intensity: 1
+            }
+        };
+        
+        // Experience examples for particles
+        const experienceExamples = {
+            external: [
+                "教授の言うことを絶対視する",
+                "親の期待に応えようとする",
+                "友人の意見に流される",
+                "成績で自己価値を測る",
+                "権威ある本を鵜呑みにする",
+                "多数派の意見に従う",
+                "評価を気にして行動を決める",
+                "他者の承認を求める"
+            ],
+            crossroads: [
+                "自分の意見を持ち始める",
+                "権威に疑問を感じる",
+                "内なる声に耳を傾ける",
+                "自己探求を始める",
+                "価値観の衝突を経験",
+                "自分らしさを模索する",
+                "独自の判断基準を作る",
+                "他者との違いを認識"
+            ],
+            internal: [
+                "自己の信念に基づいて決定",
+                "内的な基準で判断する",
+                "他者を尊重しつつ自立",
+                "自己の価値観を確立",
+                "人生哲学を持つ",
+                "真の自己を表現する",
+                "相互依存的な関係を築く",
+                "内なる声を信頼する"
+            ]
+        };
+        
+        let tutorialShown = false;
+        
+        function checkDevice() {
+            const width = window.innerWidth;
+            isMobile = width <= 768;
+            isTablet = width > 768 && width <= 1024;
+            
+            // Adjust particle count based on device
+            if (isMobile) {
+                particleCount = 60;
+            } else if (isTablet) {
+                particleCount = 100;
+            } else {
+                particleCount = 150;
+            }
+            
+            // Update tutorial instructions based on device
+            if (isMobile || isTablet) {
+                const instructions = document.getElementById('control-instructions');
+                if (instructions) {
+                    instructions.innerHTML = `
+                        • タッチドラッグで視点を回転<br>
+                        • ピンチでズーム<br>
+                        • パーティクルをタップで詳細表示<br>
+                        • 下部のノードで段階を直接選択<br><br>
+                    `;
+                }
+            }
+        }
+        
+        function toggleInfoPanel() {
+            const info = document.getElementById('info');
+            info.classList.toggle('show');
+        }
+        
+        function toggleMobileMenu() {
+            const controls = document.getElementById('controls');
+            controls.classList.toggle('show');
+        }
+        
+        function init() {
+            // Check device type
+            checkDevice();
+            
+            // Show tutorial only once per session
+            if (!tutorialShown) {
+                document.getElementById('tutorial').style.display = 'block';
+            }
+            
+            // 音声コンテキストの初期化
+            initAudioContext();
+            
+            // Scene setup
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0a0a0a, 10, 50);
+            
+            // Camera setup
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 5, cameraDistance);
+            camera.lookAt(0, 0, 0);
+            
+            // Renderer setup
+            renderer = new THREE.WebGLRenderer({ 
+                antialias: !isMobile,  // Disable antialiasing on mobile for performance
+                powerPreference: isMobile ? "low-power" : "high-performance"
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+            renderer.shadowMap.enabled = !isMobile;  // Disable shadows on mobile
+            if (renderer.shadowMap.enabled) {
+                renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            }
+            document.body.appendChild(renderer.domElement);
+            
+            // Initialize raycaster for mouse interaction
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
+            
+            // Mouse controls
+            let mouseDown = false;
+            let mouseX = 0;
+            let mouseY = 0;
+            
+            renderer.domElement.addEventListener('mousedown', (e) => {
+                mouseDown = true;
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+            
+            renderer.domElement.addEventListener('mouseup', () => {
+                mouseDown = false;
+            });
+            
+            renderer.domElement.addEventListener('mousemove', (e) => {
+                if (mouseDown) {
+                    const deltaX = e.clientX - mouseX;
+                    const deltaY = e.clientY - mouseY;
+                    
+                    // Rotate camera around center
+                    const spherical = new THREE.Spherical();
+                    spherical.setFromVector3(camera.position);
+                    spherical.theta -= deltaX * 0.01;
+                    spherical.phi += deltaY * 0.01;
+                    spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
+                    camera.position.setFromSpherical(spherical);
+                    camera.lookAt(0, 0, 0);
+                    
+                    mouseX = e.clientX;
+                    mouseY = e.clientY;
+                }
+                
+                // Update mouse position for raycasting
+                mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            });
+            
+            // Mouse wheel for zoom
+            renderer.domElement.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const scale = e.deltaY > 0 ? 1.1 : 0.9;
+                cameraDistance *= scale;
+                cameraDistance = Math.max(5, Math.min(30, cameraDistance));
+                camera.position.normalize().multiplyScalar(cameraDistance);
+            });
+            
+            // Touch controls
+            renderer.domElement.addEventListener('touchstart', handleTouchStart, { passive: false });
+            renderer.domElement.addEventListener('touchmove', handleTouchMove, { passive: false });
+            renderer.domElement.addEventListener('touchend', handleTouchEnd, { passive: false });
+            
+            // Click/Tap event for particles
+            renderer.domElement.addEventListener('click', onParticleClick);
+            renderer.domElement.addEventListener('touchend', (e) => {
+                if (e.touches.length === 0 && e.changedTouches.length === 1) {
+                    // Convert touch to mouse coordinates
+                    const touch = e.changedTouches[0];
+                    mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+                    mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+                    onParticleClick(touch);
+                }
+            });
+            
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x404040, isMobile ? 0.6 : 0.5);
+            scene.add(ambientLight);
+            
+            if (!isMobile) {
+                const pointLight1 = new THREE.PointLight(0x0ea5e9, 2, 20);
+                pointLight1.position.set(5, 5, 5);
+                pointLight1.castShadow = true;
+                scene.add(pointLight1);
+                
+                const pointLight2 = new THREE.PointLight(0xf59e0b, 2, 20);
+                pointLight2.position.set(-5, 5, -5);
+                pointLight2.castShadow = true;
+                scene.add(pointLight2);
+            }
+            
+            const pointLight3 = new THREE.PointLight(0x10b981, 1, 15);
+            pointLight3.position.set(0, -5, 0);
+            scene.add(pointLight3);
+            
+            // Create core (self)
+            const coreGeometry = new THREE.SphereGeometry(0.3, isMobile ? 32 : 64, isMobile ? 32 : 64);
+            const coreMaterial = new THREE.MeshPhongMaterial({
+                color: 0xffffff,
+                emissive: 0x0ea5e9,
+                emissiveIntensity: 0.5,
+                shininess: 100,
+                transparent: true,
+                opacity: 0.9
+            });
+            core = new THREE.Mesh(coreGeometry, coreMaterial);
+            core.castShadow = !isMobile;
+            core.receiveShadow = !isMobile;
+            scene.add(core);
+            
+            // Add glow effect to core
+            const glowGeometry = new THREE.SphereGeometry(0.4, 32, 32);
+            const glowMaterial = new THREE.MeshBasicMaterial({
+                color: 0x0ea5e9,
+                transparent: true,
+                opacity: 0.3
+            });
+            const coreGlow = new THREE.Mesh(glowGeometry, glowMaterial);
+            core.add(coreGlow);
+            
+            // Create dimension rings with more detail
+            const ringColors = [0x3b82f6, 0x10b981, 0xf59e0b];
+            const ringRadii = [2, 3, 4];
+            
+            for (let i = 0; i < 3; i++) {
+                const ringGeometry = new THREE.TorusGeometry(ringRadii[i], 0.1, 16, isMobile ? 50 : 100);
+                const ringMaterial = new THREE.MeshPhongMaterial({
+                    color: ringColors[i],
+                    emissive: ringColors[i],
+                    emissiveIntensity: 0.3,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+                ring.rotation.x = Math.PI / 2;
+                ring.castShadow = !isMobile;
+                dimensionRings.push(ring);
+                scene.add(ring);
+                
+                // Add orbital particles to rings (reduced for mobile)
+                const orbitalCount = isMobile ? 10 : 20;
+                for (let j = 0; j < orbitalCount; j++) {
+                    const angle = (j / orbitalCount) * Math.PI * 2;
+                    const orbitalGeometry = new THREE.SphereGeometry(0.03, 8, 8);
+                    const orbitalMaterial = new THREE.MeshPhongMaterial({
+                        color: ringColors[i],
+                        emissive: ringColors[i],
+                        emissiveIntensity: 0.8
+                    });
+                    const orbital = new THREE.Mesh(orbitalGeometry, orbitalMaterial);
+                    orbital.position.set(
+                        Math.cos(angle) * ringRadii[i],
+                        0,
+                        Math.sin(angle) * ringRadii[i]
+                    );
+                    ring.add(orbital);
+                }
+            }
+            
+            // Create particles representing experiences
+            const particleGeometry = new THREE.SphereGeometry(0.05, isMobile ? 8 : 16, isMobile ? 8 : 16);
+            
+            for (let i = 0; i < particleCount; i++) {
+                const hue = Math.random();
+                const particleMaterial = new THREE.MeshPhongMaterial({
+                    color: new THREE.Color().setHSL(hue, 0.7, 0.5),
+                    emissive: new THREE.Color().setHSL(hue, 0.7, 0.5),
+                    emissiveIntensity: 0.5,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+                particle.castShadow = !isMobile;
+                
+                // Random initial position
+                const angle = Math.random() * Math.PI * 2;
+                const radius = Math.random() * 5 + 1;
+                const height = (Math.random() - 0.5) * 4;
+                
+                particle.position.set(
+                    Math.cos(angle) * radius,
+                    height,
+                    Math.sin(angle) * radius
+                );
+                
+                // Assign experience text
+                const stageType = Math.random() < 0.33 ? 'external' : Math.random() < 0.66 ? 'crossroads' : 'internal';
+                const experiences = experienceExamples[stageType];
+                
+                particle.userData = {
+                    angle: angle,
+                    radius: radius,
+                    height: height,
+                    speed: Math.random() * 0.02 + 0.01,
+                    experience: experiences[Math.floor(Math.random() * experiences.length)],
+                    type: stageType
+                };
+                
+                particles.push(particle);
+                scene.add(particle);
+            }
+            
+            // Create journey path
+            createJourneyPath();
+            
+            // Initialize audio context
+            if (window.AudioContext || window.webkitAudioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            // Setup speed slider
+            const speedSlider = document.getElementById('speed-slider');
+            if (speedSlider) {
+                speedSlider.addEventListener('input', (e) => {
+                    const value = parseFloat(e.target.value);
+                    speedMultiplier = value < 0.05 ? 0 : value;
+                    
+                    const speedValueElement = document.getElementById('speed-value');
+                    if (speedValueElement) {
+                        speedValueElement.textContent = speedMultiplier === 0 ? '停止' : speedMultiplier.toFixed(1) + 'x';
+                    }
+                });
+                
+                speedMultiplier = 1.0;
+                document.getElementById('speed-value').textContent = '1.0x';
+            }
+            
+            // Initialize sub-stage controls
+            updateSubStageControls();
+            
+            // Remove loader
+            document.getElementById('loader').style.display = 'none';
+            
+            // Start animation
+            animate();
+        }
+        
+        function handleTouchStart(e) {
+            e.preventDefault();
+            
+            if (e.touches.length === 1) {
+                // Single touch - rotation
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            } else if (e.touches.length === 2) {
+                // Two touches - pinch zoom
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                touchStartDistance = Math.sqrt(dx * dx + dy * dy);
+            }
+        }
+        
+        function handleTouchMove(e) {
+            e.preventDefault();
+            
+            if (e.touches.length === 1) {
+                // Single touch - rotation
+                const deltaX = e.touches[0].clientX - touchStartX;
+                const deltaY = e.touches[0].clientY - touchStartY;
+                
+                const spherical = new THREE.Spherical();
+                spherical.setFromVector3(camera.position);
+                spherical.theta -= deltaX * 0.01;
+                spherical.phi += deltaY * 0.01;
+                spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
+                camera.position.setFromSpherical(spherical);
+                camera.lookAt(0, 0, 0);
+                
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            } else if (e.touches.length === 2) {
+                // Two touches - pinch zoom
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                const scale = distance / touchStartDistance;
+                cameraDistance *= (2 - scale);
+                cameraDistance = Math.max(5, Math.min(30, cameraDistance));
+                camera.position.normalize().multiplyScalar(cameraDistance);
+                
+                touchStartDistance = distance;
+            }
+        }
+        
+        function handleTouchEnd(e) {
+            e.preventDefault();
+        }
+        
+        function createJourneyPath() {
+            // Create multi-layered light emanation system
+            journeyPath = new THREE.Group();
+            journeyPath.name = 'lightEmanation';
+            
+            // Adjust light layers for mobile
+            const lightLayers = isMobile ? [
+                { size: 1.5, opacity: 0.15, speed: 1.0 },
+                { size: 3.5, opacity: 0.08, speed: 0.6 },
+                { size: 5, opacity: 0.05, speed: 0.4 }
+            ] : [
+                { size: 1.5, opacity: 0.15, speed: 1.0 },
+                { size: 2.5, opacity: 0.1, speed: 0.8 },
+                { size: 3.5, opacity: 0.08, speed: 0.6 },
+                { size: 5, opacity: 0.05, speed: 0.4 },
+                { size: 7, opacity: 0.04, speed: 0.3 }
+            ];
+            
+            lightLayers.forEach((layer, index) => {
+                const lightGeometry = new THREE.SphereGeometry(layer.size, isMobile ? 16 : 32, isMobile ? 16 : 32);
+                
+                const lightMaterial = new THREE.MeshBasicMaterial({
+                    color: new THREE.Color().setHSL(0.55 + index * 0.05, 0.6, 0.4),
+                    transparent: true,
+                    opacity: layer.opacity,
+                    blending: THREE.AdditiveBlending,
+                    side: THREE.DoubleSide,
+                    depthWrite: false
+                });
+                
+                const lightMesh = new THREE.Mesh(lightGeometry, lightMaterial);
+                lightMesh.userData = { 
+                    layerIndex: index, 
+                    baseOpacity: layer.opacity,
+                    material: lightMaterial,
+                    speed: layer.speed
+                };
+                journeyPath.add(lightMesh);
+            });
+            
+            // Reduce particle count for mobile
+            const sparkParticleCount = isMobile ? 30 : 60;
+            for (let i = 0; i < sparkParticleCount; i++) {
+                const radius = Math.random() * 8 + 2;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(Math.random() * 2 - 1);
+                
+                const x = radius * Math.sin(phi) * Math.cos(theta);
+                const y = radius * Math.sin(phi) * Math.sin(theta);
+                const z = radius * Math.cos(phi);
+                
+                const sparkGeometry = new THREE.SphereGeometry(0.015, 6, 6);
+                
+                const hue = (i / sparkParticleCount + Math.random() * 0.1) % 1;
+                const sparkMaterial = new THREE.MeshBasicMaterial({
+                    color: new THREE.Color().setHSL(hue, 0.6, 0.4),
+                    transparent: true,
+                    opacity: 0.4,
+                    blending: THREE.AdditiveBlending,
+                    depthWrite: false
+                });
+                
+                const spark = new THREE.Mesh(sparkGeometry, sparkMaterial);
+                spark.position.set(x, y, z);
+                
+                spark.userData = {
+                    isSparkParticle: true,
+                    originalPosition: new THREE.Vector3(x, y, z),
+                    particleIndex: i,
+                    baseColor: hue
+                };
+                
+                journeyPath.add(spark);
+            }
+            
+            journeyPath.visible = false;
+            scene.add(journeyPath);
+        }
+        
+        function showStage(stage) {
+            currentStage = stage;
+            
+            // Update main stage buttons
+            document.querySelectorAll('.main-stage-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update sub-stage controls
+            updateSubStageControls();
+            
+            // Select first sub-stage of the main stage
+            const subStages = Object.keys(subStageData).filter(key => subStageData[key].parent === stage);
+            if (subStages.length > 0) {
+                showSubStage(subStages[0]);
+            }
+        }
+        
+        function updateSubStageControls() {
+            const container = document.getElementById('sub-stage-controls');
+            container.innerHTML = '';
+            
+            const subStages = Object.keys(subStageData).filter(key => subStageData[key].parent === currentStage);
+            
+            subStages.forEach(subStage => {
+                const button = document.createElement('button');
+                button.className = 'sub-stage-btn';
+                button.textContent = subStage;
+                button.onclick = () => showSubStage(subStage);
+                if (subStage === currentSubStage) {
+                    button.classList.add('active');
+                }
+                container.appendChild(button);
+            });
+        }
+        
+        function showSubStage(subStage) {
+            currentSubStage = subStage;
+            const data = subStageData[subStage];
+            
+            // Update UI
+            document.getElementById('current-stage').textContent = data.name;
+            document.getElementById('stage-description').textContent = data.description;
+            document.getElementById('epistemological').textContent = data.epistemological;
+            document.getElementById('intrapersonal').textContent = data.intrapersonal;
+            document.getElementById('interpersonal').textContent = data.interpersonal;
+            
+            // Update buttons
+            document.querySelectorAll('.sub-stage-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent === subStage) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Update progress nodes
+            updateProgressNodes(subStage);
+            
+            // Play sound effect if enabled
+            if (soundEnabled && audioContext) {
+                playTransitionSound(data.intensity);
+            }
+        }
+        
+        function updateProgressNodes(activeStage) {
+            const stages = ['Ea', 'Eb', 'Ec', 'EI', 'E-I', 'I-E', 'IE', 'Ia', 'Ib', 'Ic'];
+            const activeIndex = stages.indexOf(activeStage);
+            
+            document.querySelectorAll('.progress-node').forEach((node, index) => {
+                node.classList.remove('active', 'completed');
+                if (index === activeIndex) {
+                    node.classList.add('active');
+                } else if (index < activeIndex) {
+                    node.classList.add('completed');
+                }
+            });
+        }
+        
+        function jumpToStage(stage) {
+            // Determine parent stage
+            const data = subStageData[stage];
+            currentStage = data.parent;
+            
+            // Update main stage buttons
+            document.querySelectorAll('.main-stage-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.includes(currentStage === 'external' ? '外的意味形成' : 
+                                           currentStage === 'crossroads' ? '岐路' : '内的意味形成')) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Update sub-stage controls and show the stage
+            updateSubStageControls();
+            showSubStage(stage);
+        }
+        
+        function toggleAnimation() {
+            animationRunning = !animationRunning;
+            document.getElementById('animation-toggle').textContent = `自動進行: ${animationRunning ? 'ON' : 'OFF'}`;
+        }
+        
+        function togglePath() {
+            pathEnabled = !pathEnabled;
+            if (journeyPath) {
+                journeyPath.visible = pathEnabled;
+            }
+            
+            const button = document.querySelector('.path-toggle');
+            if (button) {
+                button.textContent = `内なる光: ${pathEnabled ? 'ON' : 'OFF'}`;
+            }
+            
+            // 音声フィードバック
+            if (pathEnabled && soundEnabled && audioContext) {
+                try {
+                    playTransitionSound(0.8);
+                } catch (error) {
+                    console.warn('Error playing sound:', error);
+                }
+            }
+        }
+        
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const button = document.querySelector('.sound-toggle');
+            if (button) {
+                button.textContent = soundEnabled ? '🔊' : '🔇';
+            }
+        }
+        
+        function resetView() {
+            cameraDistance = 10;
+            camera.position.set(0, 5, cameraDistance);
+            camera.lookAt(0, 0, 0);
+        }
+        
+        // 音声コンテキストの安全な初期化
+        function initAudioContext() {
+            if (!audioContext && (window.AudioContext || window.webkitAudioContext)) {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // ブラウザのautoplay policyに対応
+                    if (audioContext.state === 'suspended') {
+                        const resumeAudio = () => {
+                            audioContext.resume().then(() => {
+                                console.log('Audio context resumed');
+                            });
+                            document.removeEventListener('click', resumeAudio);
+                            document.removeEventListener('keydown', resumeAudio);
+                            document.removeEventListener('touchstart', resumeAudio);
+                        };
+                        
+                        document.addEventListener('click', resumeAudio);
+                        document.addEventListener('keydown', resumeAudio);
+                        document.addEventListener('touchstart', resumeAudio);
+                    }
+                } catch (error) {
+                    console.warn('Failed to initialize audio context:', error);
+                    soundEnabled = false;
+                }
+            }
+        }
+        
+        function closeTutorial() {
+            document.getElementById('tutorial').style.display = 'none';
+            tutorialShown = true;
+        }
+        
+        function playTransitionSound(intensity) {
+            if (!audioContext || audioContext.state === 'suspended') return;
+            
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 200 + intensity * 600;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.1);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            } catch (error) {
+                console.warn('Error playing sound:', error);
+            }
+        }
+        
+        function onParticleClick(event) {
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(particles);
+            
+            if (intersects.length > 0) {
+                const particle = intersects[0].object;
+                const info = document.getElementById('particle-info');
+                info.innerHTML = `
+                    <strong>経験の例：</strong><br>
+                    "${particle.userData.experience}"<br><br>
+                    <small>タイプ: ${particle.userData.type === 'external' ? '外的' : 
+                                    particle.userData.type === 'crossroads' ? '岐路' : '内的'}</small>
+                `;
+                info.style.display = 'block';
+                
+                if (!isMobile) {
+                    info.style.left = event.clientX + 10 + 'px';
+                    info.style.top = event.clientY + 10 + 'px';
+                }
+                
+                setTimeout(() => {
+                    info.style.display = 'none';
+                }, 3000);
+            }
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const data = subStageData[currentSubStage];
+            
+            // より確実な条件判定
+            const isAnimating = speedMultiplier > 0.01; // 0.01以下は停止とみなす
+            
+            // 速度が有効な場合のみ時間を進める
+            if (isAnimating) {
+                time += 0.01 * speedMultiplier;
+                
+                // Animate core with null check
+                if (core && data) {
+                    const targetSize = data.coreSize;
+                    core.scale.lerp(new THREE.Vector3(targetSize, targetSize, targetSize), 0.05);
+                    
+                    // Update core color
+                    const targetColor = new THREE.Color(data.coreColor);
+                    core.material.color.lerp(targetColor, 0.05);
+                    core.material.emissive.lerp(targetColor, 0.05);
+                    core.material.emissiveIntensity = data.intensity * (0.5 + Math.sin(time * 2) * 0.2);
+                    
+                    // Animate core glow with null check
+                    if (core.children[0]) {
+                        core.children[0].scale.setScalar(1 + Math.sin(time * 3) * 0.1);
+                        core.children[0].material.opacity = 0.3 * data.intensity;
+                    }
+                }
+                
+                // Animate dimension rings with null checks
+                if (dimensionRings.length > 0 && data) {
+                    dimensionRings.forEach((ring, index) => {
+                        if (ring && ring.material) {
+                            ring.rotation.z += data.ringRotation * (index + 1) * 0.5 * speedMultiplier;
+                            ring.rotation.y = Math.sin(time + index) * 0.1;
+                            
+                            // Pulsing effect
+                            const scale = 1 + Math.sin(time * 2 + index) * 0.05;
+                            ring.scale.set(scale, scale, 1);
+                            
+                            // Update ring opacity based on stage
+                            ring.material.opacity = 0.3 + data.intensity * 0.5;
+                            
+                            // Animate orbital particles
+                            if (ring.children) {
+                                ring.children.forEach((orbital, j) => {
+                                    if (orbital && orbital.position) {
+                                        const angle = (j / ring.children.length) * Math.PI * 2 + time * (index + 1) * 0.5;
+                                        const radius = 2 + index;
+                                        orbital.position.set(
+                                            Math.cos(angle) * radius,
+                                            Math.sin(time * 2 + j) * 0.2,
+                                            Math.sin(angle) * radius
+                                        );
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+                
+                // Animate particles with null checks
+                if (particles.length > 0 && data) {
+                    particles.forEach((particle, index) => {
+                        if (particle && particle.userData && particle.material) {
+                            const userData = particle.userData;
+                            userData.angle += userData.speed * speedMultiplier;
+                            
+                            // Adjust radius based on stage
+                            const targetRadius = userData.radius * (data.particleSpread / 5);
+                            const currentRadius = Math.sqrt(particle.position.x ** 2 + particle.position.z ** 2);
+                            const newRadius = currentRadius + (targetRadius - currentRadius) * 0.02;
+                            
+                            particle.position.x = Math.cos(userData.angle) * newRadius;
+                            particle.position.z = Math.sin(userData.angle) * newRadius;
+                            particle.position.y = userData.height * Math.sin(time + index * 0.1) * 0.5;
+                            
+                            // Particle glow and opacity based on stage affinity
+                            const stageAffinity = 
+                                (userData.type === 'external' && currentStage === 'external') ||
+                                (userData.type === 'crossroads' && currentStage === 'crossroads') ||
+                                (userData.type === 'internal' && currentStage === 'internal');
+                            
+                            particle.material.emissiveIntensity = stageAffinity ? 
+                                0.8 + Math.sin(time * 3 + index) * 0.2 : 
+                                0.2 + Math.sin(time * 3 + index) * 0.1;
+                            
+                            particle.material.opacity = stageAffinity ? 0.9 : 0.3;
+                        }
+                    });
+                }
+                
+                // Animate journey path (light emanation) if visible
+                if (journeyPath && journeyPath.visible && data) {
+                    const stages = ['Ea', 'Eb', 'Ec', 'EI', 'E-I', 'I-E', 'IE', 'Ia', 'Ib', 'Ic'];
+                    const currentStageIndex = stages.indexOf(currentSubStage);
+                    const growthProgress = Math.max(0, currentStageIndex) / (stages.length - 1);
+                    
+                    // Update light layers and particles
+                    journeyPath.children.forEach(child => {
+                        try {
+                            if (child && child.userData && child.userData.layerIndex !== undefined) {
+                                // スフィアレイヤーのアニメーション
+                                const layer = child.userData;
+                                
+                                if (child.material && child.material.color) {
+                                    const hue = (0.55 + growthProgress * 0.2 + time * layer.speed * 0.05) % 1;
+                                    child.material.color.setHSL(hue, 0.6, 0.4);
+                                    
+                                    const baseOpacity = layer.baseOpacity || 0.15;
+                                    const intensity = Math.min(data.intensity * 0.6, 0.8);
+                                    child.material.opacity = baseOpacity * intensity * (0.3 + growthProgress * 0.4);
+                                }
+                                
+                                if (child.rotation) {
+                                    child.rotation.y += 0.001 * (layer.layerIndex + 1) * speedMultiplier;
+                                    child.rotation.x = Math.sin(time * layer.speed + layer.layerIndex) * 0.03;
+                                    child.rotation.z = Math.cos(time * layer.speed * 0.7 + layer.layerIndex) * 0.02;
+                                    
+                                    const pulse = 1 + Math.sin(time * layer.speed * 1.2) * 0.03 * growthProgress;
+                                    child.scale.setScalar(pulse);
+                                }
+                                
+                            } else if (child && child.userData && child.userData.isSparkParticle) {
+                                const userData = child.userData;
+                                const originalPos = userData.originalPosition;
+                                
+                                const expansion = 1 + Math.sin(time * 0.3 + originalPos.length() * 0.1) * 0.2 * growthProgress;
+                                const rotationY = time * 0.05 * speedMultiplier;
+                                
+                                const rotatedX = originalPos.x * Math.cos(rotationY) - originalPos.z * Math.sin(rotationY);
+                                const rotatedZ = originalPos.x * Math.sin(rotationY) + originalPos.z * Math.cos(rotationY);
+                                
+                                child.position.set(
+                                    rotatedX * expansion,
+                                    originalPos.y * expansion + Math.sin(time * 1.5 + userData.particleIndex * 0.1) * 0.1,
+                                    rotatedZ * expansion
+                                );
+                                
+                                if (child.material) {
+                                    const hue = (userData.baseColor + growthProgress * 0.1 + time * 0.02) % 1;
+                                    child.material.color.setHSL(hue, 0.6, 0.4);
+                                    child.material.opacity = 0.4 * (0.2 + growthProgress * 0.5);
+                                }
+                                
+                                const sparkScale = 0.3 + Math.sin(time * 2 + userData.particleIndex) * 0.2 + growthProgress * 0.3;
+                                child.scale.setScalar(sparkScale);
+                            }
+                        } catch (error) {
+                            console.warn('Error animating journey path child:', error);
+                        }
+                    });
+                }
+            } else {
+                // 完全停止状態 - すべてのアニメーションを停止
+                if (core && data) {
+                    const targetSize = data.coreSize;
+                    core.scale.lerp(new THREE.Vector3(targetSize, targetSize, targetSize), 0.05);
+                    
+                    const targetColor = new THREE.Color(data.coreColor);
+                    core.material.color.lerp(targetColor, 0.05);
+                    core.material.emissive.lerp(targetColor, 0.05);
+                    core.material.emissiveIntensity = data.intensity * 0.5;
+                    
+                    if (core.children[0]) {
+                        core.children[0].scale.setScalar(1);
+                        core.children[0].material.opacity = 0.3 * data.intensity;
+                    }
+                }
+                
+                // リングも静的状態に
+                if (dimensionRings.length > 0 && data) {
+                    dimensionRings.forEach((ring, index) => {
+                        if (ring && ring.material) {
+                            ring.scale.set(1, 1, 1);
+                            ring.material.opacity = 0.3 + data.intensity * 0.5;
+                        }
+                    });
+                }
+                
+                // パーティクルも静的状態に
+                if (particles.length > 0 && data) {
+                    particles.forEach((particle, index) => {
+                        if (particle && particle.userData && particle.material) {
+                            const stageAffinity = 
+                                (particle.userData.type === 'external' && currentStage === 'external') ||
+                                (particle.userData.type === 'crossroads' && currentStage === 'crossroads') ||
+                                (particle.userData.type === 'internal' && currentStage === 'internal');
+                            
+                            particle.material.emissiveIntensity = stageAffinity ? 0.8 : 0.2;
+                            particle.material.opacity = stageAffinity ? 0.9 : 0.3;
+                        }
+                    });
+                }
+                
+                // 内なる光も静的状態に
+                if (journeyPath && journeyPath.visible && data) {
+                    const stages = ['Ea', 'Eb', 'Ec', 'EI', 'E-I', 'I-E', 'IE', 'Ia', 'Ib', 'Ic'];
+                    const currentStageIndex = stages.indexOf(currentSubStage);
+                    const growthProgress = Math.max(0, currentStageIndex) / (stages.length - 1);
+                    
+                    journeyPath.children.forEach(child => {
+                        try {
+                            if (child && child.userData && child.userData.layerIndex !== undefined) {
+                                if (child.material && child.material.color) {
+                                    const hue = (0.55 + growthProgress * 0.2) % 1;
+                                    child.material.color.setHSL(hue, 0.6, 0.4);
+                                    
+                                    const baseOpacity = child.userData.baseOpacity || 0.15;
+                                    const intensity = Math.min(data.intensity * 0.6, 0.8);
+                                    child.material.opacity = baseOpacity * intensity * (0.3 + growthProgress * 0.4);
+                                }
+                                
+                                if (child.scale) {
+                                    child.scale.setScalar(1);
+                                }
+                                
+                            } else if (child && child.userData && child.userData.isSparkParticle) {
+                                child.position.copy(child.userData.originalPosition);
+                                if (child.material) {
+                                    const hue = (child.userData.baseColor + growthProgress * 0.1) % 1;
+                                    child.material.color.setHSL(hue, 0.6, 0.4);
+                                    child.material.opacity = 0.4 * (0.2 + growthProgress * 0.5);
+                                }
+                                child.scale.setScalar(0.3 + growthProgress * 0.3);
+                            }
+                        } catch (error) {
+                            console.warn('Error animating journey path child:', error);
+                        }
+                    });
+                }
+            }
+            
+            // 自動進行は速度が有効で、かつanimationRunningがtrueの場合のみ
+            if (animationRunning && isAnimating && data) {
+                const stages = ['Ea', 'Eb', 'Ec', 'EI', 'E-I', 'I-E', 'IE', 'Ia', 'Ib', 'Ic'];
+                const currentIndex = stages.indexOf(currentSubStage);
+                const progressTime = (time * 0.1) % stages.length;
+                const targetIndex = Math.floor(progressTime);
+                
+                if (targetIndex !== currentIndex && targetIndex >= 0 && targetIndex < stages.length) {
+                    jumpToStage(stages[targetIndex]);
+                }
+            }
+            
+            // 常にレンダリング（表示更新のため）
+            if (renderer && scene && camera) {
+                renderer.render(scene, camera);
+            }
+        }
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            checkDevice();
+            
+            if (camera && renderer) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+            }
+        });
+        
+        // Initialize
+        init();
+    </script>
+</body>
+</html>
